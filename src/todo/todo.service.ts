@@ -1,16 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
-import { Todo } from '../schemas/todo.schema';
+import { Todo } from '../schema/todo.schema';
+import { CreateTodoDto } from 'src/todo/dto/createTodo.dto';
+import { UpdateTodoDto } from './dto/updateTodo.dto';
 
 @Injectable()
 export class TodoService {
   constructor(@InjectModel(Todo.name) private todoModel: Model<Todo>) {}
 
-  async findAll(status?: string, sortBy?: string): Promise<Todo[]> {
+  async findAll(
+    status?: string,
+    dueDate?: string,
+    sortBy?: string,
+  ): Promise<Todo[]> {
     let query = {};
     if (status) {
-      query = { ...query, status: status };
+      query = { ...query, status: status, dueDate: dueDate };
     }
     let sortQuery = {};
     if (sortBy) {
@@ -36,12 +42,12 @@ export class TodoService {
     return this.todoModel.findById(id).exec();
   }
 
-  async create(todo: Todo): Promise<Todo> {
-    const createdTodo = new this.todoModel(todo);
+  async create(createTodoDto: CreateTodoDto): Promise<Todo> {
+    const createdTodo = new this.todoModel(createTodoDto);
     return createdTodo.save();
   }
 
-  async update(id: string, todo: Todo): Promise<Todo> {
+  async update(id: string, todo: UpdateTodoDto): Promise<Todo> {
     return this.todoModel.findByIdAndUpdate(id, todo, { new: true }).exec();
   }
 
